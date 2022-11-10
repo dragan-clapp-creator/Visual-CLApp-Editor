@@ -1,0 +1,404 @@
+package clapp.start;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.Dimension;
+import java.awt.Insets;
+import java.awt.Rectangle;
+import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
+import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JDialog;
+import javax.swing.JEditorPane;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JToggleButton;
+import javax.swing.Spring;
+import javax.swing.SpringLayout;
+import javax.swing.SpringLayout.Constraints;
+import javax.swing.border.EtchedBorder;
+import javax.swing.border.TitledBorder;
+
+import clapp.run.http.ClappSender;
+import clapp.run.http.IKrypter;
+import clapp.run.util.ClpClassHandler;
+
+public class Launcher {
+
+  private static final int BASE_WIDTH = 400;
+
+  private JDialog frame;
+  private String[] contents = new String[] {
+      "no content information"
+  };
+  private String[] titles = new String[] {
+      "MSC//4500/"
+  };
+  private String[] buttons = new String[] {
+      "e", "a"
+  };
+  private String[] cmdarray = new String[] {
+      "bash;-c;\"/Users/dragan/clapp/Examples/1_hello_with_grafcet/\"MSC.sh"
+  };
+  private ArrayList<String> hosts;
+  private ArrayList<Integer> ports;
+  private String currentHost;
+  private ArrayList<Long> pids;
+  private ClappSender sender;
+
+
+  public static void main(String[] args) {
+    Launcher launcher = new Launcher();
+    if (args.length == 2) {
+      launcher.launch(args[0]);
+      launcher.sender = new ClappSender(getCryptingInstance(args[1]));
+      System.out.println("sender with crypter "+args[1]);
+    }
+    else {
+      if (args.length == 1) {
+        launcher.launch(args[0]);
+      }
+      else {
+        launcher.launch("CLApp launcher");
+      }
+      launcher.sender = new ClappSender();
+      System.out.println("sender without crypter");
+    }
+  }
+
+  //
+  private static IKrypter getCryptingInstance(String string) {
+    Class<?> cl;
+    try {
+      cl = Class.forName(string, false, ClpClassHandler.getInstance().getLoader());
+      Constructor<?> cons = cl.getConstructor();
+      return (IKrypter) cons.newInstance();
+    }
+    catch (ClassNotFoundException | NoSuchMethodException | SecurityException | InstantiationException |
+           IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+      e.printStackTrace();
+    }
+    return null;
+  }
+
+  private void launch(String title) {
+    frame = new JDialog((JFrame)null, title, false);
+    frame.setLayout(new BorderLayout());
+    frame.setBackground(Color.gray);
+    JPanel globalPanel = new JPanel();
+    globalPanel.setLayout(new SpringLayout());
+    globalPanel.setBackground(Color.gray);
+    fillUIElements(globalPanel);
+    frame.add(globalPanel);
+    frame.pack();
+    frame.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+    showFrame(title);
+  }
+
+  //
+  private void fillUIElements(JPanel globalPanel) {
+    int nbRows = 2;
+    globalPanel.add(createControlsPanel());
+    globalPanel.add(createTitlesPanel());
+    if (buttons.length > 0) {
+      nbRows++;
+      globalPanel.add(createButtonsPanel());
+    }
+
+    makeCompactGrid(globalPanel, nbRows, 1, 6, 6, 6, 6);
+  }
+
+  //
+  private JPanel createControlsPanel() {
+    JPanel p = new JPanel(new SpringLayout());
+    TitledBorder border = BorderFactory.createTitledBorder(
+        BorderFactory.createBevelBorder(EtchedBorder.RAISED),
+        "Controls");
+    p.setBorder(border);
+
+    JButton start = new JButton("start");
+    start.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        try {
+          exec(cmdarray);
+        }
+        catch (IOException | InterruptedException e1) {
+          e1.printStackTrace();
+        }
+      }
+    });
+    JButton stop = new JButton("stop");
+    stop.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        try {
+          kill(pids);
+        }
+        catch (IOException | InterruptedException e1) {
+          e1.printStackTrace();
+        }
+      }
+    });
+    p.add(start);
+    p.add(stop);
+
+    //Lay out the panel.
+    makeCompactGrid(p, 1, 2, 6, 6, 6, 6);
+
+    //Set up the content pane.
+    p.setOpaque(true);  //content panes must be opaque
+    return p;
+  }
+
+  //
+  private JPanel createTitlesPanel() {
+    JPanel p = new JPanel(new SpringLayout());
+
+    hosts = new ArrayList<>();
+    ports = new ArrayList<>();
+    for (int i=0; i<titles.length; i++) {
+      String[] sp = titles[i].split("/");
+      String title = sp[0];
+      if (sp.length == 4) {
+        title += " listening on port " + sp[2];
+        if (!sp[1].isBlank()) {
+          title += " of host " + sp[1];
+          hosts.add(sp[1]);
+        }
+        else {
+          hosts.add("localhost");
+        }
+        if (!sp[3].isBlank()) {
+          title += " crypting with " + sp[3];
+        }
+        ports.add(Integer.parseInt(sp[2]));
+      }
+      JPanel jp = new JPanel();
+      jp.setBorder(
+          BorderFactory.createTitledBorder(
+              BorderFactory.createBevelBorder(EtchedBorder.RAISED),
+              title));
+      JEditorPane infoArea = new JEditorPane();
+      infoArea.setContentType("text/html");
+      int height = contents[i].length() / 4;
+      if (height < 30) {
+        height = 30;
+      }
+      infoArea.setPreferredSize(new Dimension(getWidth()-40, height));
+      infoArea.setText(contents[i]);
+      infoArea.setEditable(false);
+      jp.add(infoArea);
+      p.add(jp);
+    }
+
+    //Lay out the panel.
+    makeCompactGrid(p, titles.length, 1, 6, 6, 6, 6);
+
+    //Set up the content pane.
+    p.setOpaque(true);  //content panes must be opaque
+    return p;
+  }
+
+  //
+  private JPanel createButtonsPanel() {
+    JPanel p = new JPanel(new SpringLayout());
+    TitledBorder border = BorderFactory.createTitledBorder(
+        BorderFactory.createBevelBorder(EtchedBorder.RAISED),
+        "Control Buttons");
+    p.setBorder(border);
+
+    if (ports.size() == 1) {
+      for (int i=0; i<buttons.length; i++) {
+        JToggleButton btn = new JToggleButton(buttons[i]);
+        btn.addActionListener(new ActionListener() {
+          @Override
+          public void actionPerformed(ActionEvent e) {
+            try {
+              int port = ports.get(0);
+              String source = "set FLOW_RES { BOOL " + btn.getText() + " = " + (btn.isSelected() ? "true" : "false") + "; }";
+              sender.sendSource(port, source);
+            }
+            catch (IOException e1) {
+              e1.printStackTrace();
+            }
+          }
+        });
+        p.add(btn);
+      }
+    }
+    else {
+      for (int i=0; i<buttons.length; i++) {
+        JPanel subjp = new JPanel();
+        JToggleButton btn = new JToggleButton(buttons[i]);
+        btn.addActionListener(new ActionListener() {
+          @Override
+          public void actionPerformed(ActionEvent e) {
+            try {
+              String[] sp = currentHost.split("/");
+              String host = sp[0].isBlank() ? null : sp[0];
+              int port = Integer.parseInt(sp[1]);
+              String source = "set FLOW_RES { BOOL " + btn.getText() + " = " + (btn.isSelected() ? "true" : "false") + "; }";
+              sender.sendSource(host, port, source);
+            }
+            catch (IOException e1) {
+              e1.printStackTrace();
+            }
+          }
+        });
+        subjp.add(btn);
+        JLabel lbl = new JLabel("send to ");
+        subjp.add(lbl);
+        JComboBox<String> combo = new JComboBox<>();
+        combo.addFocusListener(new FocusListener() {
+          @Override
+          public void focusLost(FocusEvent e) {
+            currentHost = (String) combo.getSelectedItem();
+          }
+          @Override
+          public void focusGained(FocusEvent e) {
+          }
+        });
+        for (int j=0; j<hosts.size(); j++) {
+          combo.addItem(hosts.get(j)+"/"+ports.get(j));
+        }
+        subjp.add(combo);
+        p.add(subjp);
+      }
+    }
+
+    //Lay out the panel.
+    makeCompactGrid(p, buttons.length, 1, 6, 6, 6, 6);
+
+    //Set up the content pane.
+    p.setOpaque(true);  //content panes must be opaque
+    return p;
+  }
+
+  //
+  private void makeCompactGrid(Container parent,
+      int rows, int cols,
+      int initialX, int initialY,
+      int xPad, int yPad) {
+
+    SpringLayout layout;
+    try {
+        layout = (SpringLayout)parent.getLayout();
+    } catch (ClassCastException exc) {
+        System.err.println("The first argument to makeCompactGrid must use SpringLayout.");
+        return;
+    }
+
+    //Align all cells in each column and make them the same width.
+    Spring x = Spring.constant(initialX);
+    //Align all cells in each column and make them the same width.
+    for (int c = 0; c < cols; c++) {
+        Spring width = Spring.constant(0);
+        for (int r = 0; r < rows; r++) {
+            width = Spring.max(width,
+                               getConstraintsForCell(r, c, parent, cols).getWidth());
+        }
+        for (int r = 0; r < rows; r++) {
+            SpringLayout.Constraints constraints =
+                    getConstraintsForCell(r, c, parent, cols);
+            constraints.setX(x);
+            constraints.setWidth(width);
+        }
+        x = Spring.sum(x, Spring.sum(width, Spring.constant(xPad)));
+    }
+
+    //Align all cells in each row and make them the same height.
+    Spring y = Spring.constant(initialY);
+    for (int r = 0; r < rows; r++) {
+        Spring height = Spring.constant(0);
+        for (int c = 0; c < cols; c++) {
+            height = Spring.max(height,
+                                getConstraintsForCell(r, c, parent, cols).
+                                    getHeight());
+        }
+        for (int c = 0; c < cols; c++) {
+            SpringLayout.Constraints constraints =
+                    getConstraintsForCell(r, c, parent, cols);
+            constraints.setY(y);
+            constraints.setHeight(height);
+        }
+        y = Spring.sum(y, Spring.sum(height, Spring.constant(yPad)));
+    }
+
+    //Set the parent's size.
+    SpringLayout.Constraints pCons = layout.getConstraints(parent);
+    pCons.setConstraint(SpringLayout.SOUTH, y);
+    pCons.setConstraint(SpringLayout.EAST, x);
+  }
+
+  //
+  private Constraints getConstraintsForCell(int row, int col, Container parent, int cols) {
+    SpringLayout layout = (SpringLayout) parent.getLayout();
+    Component c = parent.getComponent(row * cols + col);
+    return layout.getConstraints(c);
+  }
+
+  //
+  private void kill(ArrayList<Long> pids) throws IOException, InterruptedException {
+    if (pids != null) {
+      for (long pid : pids) {
+        String cmd = "kill -9 "+pid;
+        String[] sp = cmd.split(" ");
+        Process p = Runtime.getRuntime().exec(sp);
+        p.waitFor();
+      }
+      pids.clear();
+    }
+  }
+
+  //
+  private void exec(String[] cmdarray) throws IOException, InterruptedException {
+    for (String cmd : cmdarray) {
+      String[] sp = cmd.split(";");
+      ProcessBuilder pb = new ProcessBuilder(sp);
+      Process p = pb.start();
+      long pid = p.pid();
+      System.out.printf("command %s started on pid %d\n", sp[2], pid);
+      if (pids == null) {
+        pids = new ArrayList<>();
+      }
+      pids.add(pid+1);
+    }
+  }
+
+  //
+  private int getWidth() {
+    return BASE_WIDTH * titles.length;
+  }
+
+  //
+  private void showFrame(String title) {
+    Rectangle screenRect = frame.getGraphicsConfiguration().getBounds();
+    Insets screenInsets = Toolkit.getDefaultToolkit().getScreenInsets(
+        frame.getGraphicsConfiguration());
+
+    int centerWidth = screenRect.width < frame.getSize().width ? screenRect.x
+        : screenRect.x + screenRect.width / 2 - frame.getSize().width / 2;
+    int centerHeight = screenRect.height < frame.getSize().height ? screenRect.y
+        : screenRect.y + screenRect.height / 2 - frame.getSize().height / 2;
+
+    centerHeight = centerHeight < screenInsets.top ? screenInsets.top
+        : centerHeight;
+
+    frame.setLocation(centerWidth, centerHeight);
+    frame.setVisible(true);
+  }
+}

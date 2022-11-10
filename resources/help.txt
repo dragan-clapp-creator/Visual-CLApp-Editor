@@ -1,0 +1,214 @@
+INIT=============================================
+CLApp stays for <b>Cellular Language Approach</b>.<br>
+It will help you in programming flow charts in a quite simple way, among other things.<br>
+The purpose of this IDE dedicated CLApp and called <b>Visual CLApp Editor</b> is to give you even more efficiency. It doesn't only help you
+ developing without any knowledge on the CLApp syntax, but it proposes a completely new programming approach where algorithm and unitary
+ actions are separated. You may discover the advantage of doing so as you try out.
+=============================================INIT
+
+START============================================
+You get started if you select one of the following in the <b>Source</b> menu item:
+<ul>
+  <li>New...</li>
+  <li>Open</li>
+</ul>
+With <b>New...</b>, you have the choice between creating a <b>Flow Chart Project</b> and a <b>CLApp Project</b>.<br>
+Of course, as you are not familiar with CLApp and as you are very curious, you will select the first option.<br>
+And you are right! Since, the CLApp strength is there.<br>
+There you'll find the following flow chart types.<br>
+<ul>
+  <li>Activity Diagrams</li>
+  <li>Grafcets</li>
+  <li>Weigthed Petri Nets</li>
+  <li>Colored Petri Nets</li>
+</ul>
+Select one of them and click on the button below. You get a sheet where you can draw your flow chart by combining the use of the dedicated 
+icons beside this button, context menu (right-click) on the created nodes, as well as nodes content changes (double-click).<br>
+============================================START
+
+DIAGRAM==========================================
+Designing activity diagrams is about putting together the following nodes:
+<ul>
+  <li>Initial Node</li>
+  <li>Event Node</li>
+  <li>Action Node</li>
+  <li>Decision Node</li>
+  <li>Fork</li>
+  <li>Join</li>
+  <li>Final Node</li>
+</ul>
+It is pretty intuitive if you except the fork and join nodes. These need some explanation.<br>
+The <span style="color:#FF0000">first step is to select an existing action so that a red vertical bar</span> is drawn under this action.<br>
+A <b>Fork</b> resulting out of an action node means a number (at least 2) of follow actions should be created. To do so, you enter the 
+<b>Fork mode</b> by selecting the corresponding icon. Then you click anywhere in the sheet (avoiding already existing nodes) as many times as 
+you want follow actions to be created. Once you're done, unselect the icon to exit the <b>Fork mode</b>.<br><br>
+For the <b>Join</b> the meaning is that out of a number (at least 2) of existing actions a follow action should be created. To do so, you enter 
+the <b>Join mode</b> by selecting the corresponding icon. Then you click anywhere in the sheet (avoiding already existing nodes) as many times 
+as you want follow actions to be created. If you click anywhere else above the horizontal bar, a new action with an event node will be created. 
+Once you're done, just click under the horizontal bar to create the follow action. This will unselect automatically your icon and exit the 
+<b>Join mode</b>.<br>
+==========================================DIAGRAM
+
+GRAFCET=============================================
+Grafcet icons have similar properties as those you find in the Activity Diagrams with some differences however.<br>
+The differences are listed below:
+<ul>
+  <li>here we talk about <b>steps</b> instead of actions</li>
+  <li>steps are represented as square boxes instead of rounded boxes</li>
+  <li>internal names are X1, X2, etc., instead of A1, A2, etc.</li>
+  <li>transitions are used instead of decision nodes</li>
+  <li>a grafcet flow chart always alternates steps and transitions</li>
+</ul>
+A transition may have 3 crossing conditions:
+<ul>
+  <li>a tautology, marked as <b>= 1</b>, meaning it is always true</li>
+  <li>a delay, marked as <b>ti / j / n</b>, meaning as soon as step Xj is activated a timer is triggered and the variable ti will be set to 
+  true after a delay of n</li>
+  <li>a combination of an event and a condition appearing as <b>&#8593;e.a</b> or <b>&#8595;e.a</b></li>
+</ul>
+An <b>event</b> is a variable and can thus be named at your convenience. You just have to know: it's all about a boolean variable state change. 
+The arrow represents the desired change direction.<br>
+For the <b>condition</b>, it can be a boolean variable or a logical expression like, for example: <b>a OR b AND c</b> or, another way to write 
+it, <b>a+b.c</b> <br><br>
+One more hint: In the Grafcet theory, as soon as a transition is crossable and all steps above it are active, they will be deactivated and the 
+steps underneath is will be activated.
+=============================================GRAFCET
+
+WPETRI=============================================
+In the Petri Nets theory we deal with <b>places</b> and <b>transitions</b> (instead of Grafcets' steps and transitions). And their internal 
+variables will be named P1, P2, etc. (instead of Grafcets' X1, X2, etc).<br>
+The number of icons needed to create a Petri Nets Flow Chart is reduced to the minimum (4 items), even though Petri Nets may be much more 
+complex as Grafcets. The complexity will increase if you make use of context menus to add more places above and/or underneath a transition or 
+bind a transition to an existing place. You also may double-click on a place to add an amount of initial tokens in it. And you may double-click 
+on a transition to define how many tokens should be consumed above and how many should get produced below this transition if its condition is 
+fulfilled. Petri Nets are qualified as <b>Wheighted</b> because of properties.<br>
+If a Petri Nets has only one token, it can be assimilated to a Grafcet. In that case, it is called <b>Simple Petri Nets</b> and the token 
+handling follows similar activation/deactivation rules as for Grafcets. But, if you have more than one token and the transitions are weighted, 
+a place may still be marked with tokens while got deactivated.<br>
+A general rule, concerning Activity Diagrams' <b>Actions</b>, Grafcets' <b>Steps</b> as well as Petri Nets' <b>Places</b> is that, if active, 
+the instructions you may put in, will be executed and if not, they won't. 
+=============================================WPETRI
+
+CPETRI=============================================
+With <b>Colored Petri Nets</b> we reach another complexity level, since the tokens may have different colors. With such a property, you are able 
+to let you flow chart follow different paths according to that colors. Think about changing color from one place to the next...
+=============================================CPETRI
+
+INSTRUCTION=============================================
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      table, td {
+        border: 1px solid black;
+      }
+    </style>
+  </head>
+  <body>
+    Each <b>activable node</b> i.e., an Action, a Step or a Place, may remain empty but it may also contain some instruction(s).<br>
+    An instruction can be:
+    <div><table>
+      <tr><td><b>Assignment</b></td><td>choose your variable name and type and give it a value</td></tr>
+      <tr><td><b>Print</b></td><td>allows writing to the console</li>
+      <tr><td><b>Reflect</b></td><td>exposes the internal CLApp structure or data information to the console</td></tr>
+      <tr><td><b><span style="color:#FF0000">Stop</span></b></td><td>exits the program</td></tr>
+      <tr><td><b>UI call</b></td><td>allows the call of a globally defined GUI</td></tr>
+      <tr><td><b>Java call</b></td><td>allows different ways of java calls</td></tr>
+      <tr><td><b><span style="color:#FF0000">WEB sender call</span></b></td><td>used to send information to another CLApp program through the Web</td></tr>
+    </table></div><<br>
+    Instructions marked in red don't work within the editor. They are meant to be active once your project exported.
+ </body>
+</html>
+=============================================INSTRUCTION
+
+GLOBAL=============================================
+In CLApp environment, all kinds of variables are considered as Resources.<br>
+In the <b>Global Resources</b> area you will define some special variables that can be used anywhere in the <i>activable nodes</i>).<br>
+More details can be found in the section below. 
+=============================================GLOBAL
+
+EXPORT=============================================
+Once your flow chart is defined and <i>activable nodes</i> have being filled with instructions, you may want to export it in order to let it run 
+from outside of this Editor.<br>
+The <b>Export</b> may be simple and won't need any other information as the destination path if you just have one flow chart type. But, as soon 
+as you want to use the control buttons created to guide your flow chart progress, you will need to define a <b>HTTP Port</b> on which your 
+control instruction will be sent. Don't panic: <span style="color:#00FF00">ALL HAPPENS AUTOMATICALLY</span>; you just need to give an unused 
+port number.<br>
+It may be a little more complex if you need to make two or more CLApp processes communicate with each other. Better look at a 
+tutorial for such a case.
+=============================================EXPORT
+
+GUI=============================================
+In CLApp, you are able to define some simple Graphical User Interfaces (GUI) declared as special variables. They can then just be called by 
+invoking their name through the instruction <b>show &lt;gui name&gt;</b>.<br>
+The structure of a GUI variable is the following:
+<ul style="list-style-type: none;">
+  <li><<b>Root</b></li>
+  <ul>
+    <li>Group</li>
+    <ul>
+      <li>Line</li>
+      <ul>
+        <li>UI Element</li>
+      </ul>
+    </ul>
+  </ul>
+</ul>
+given that the root may contain several groups, each group may have several lines, each line having one or more UI elements.<br>
+The UI elements are one of those:
+<ul>
+  <li>Label</li>
+  <li>Text Field</li>
+  <li>Button</li>
+  <li>Text Area</li>
+</ul>
+Some more elements will be added in the next version.
+=============================================GUI
+
+BCI=============================================
+Another special variable is used to define <b>java byte-code injection</b>. In that case, you define in which method from which class you want 
+to inject some additional code. The idea is to get some information from that method. So, you will <b>export</b> some variable (local or global) 
+from that method to some CLApp variable or just <b>notify</b> CLApp by setting a boolean to true that this method was called.<br>
+That works only if you use a java call with the explicit option to make use of that BCI variable.
+=============================================BCI
+
+WEB=============================================
+A Web variable definition allows to setup the remote communication receiver. Through the instruction <b>send &lt;some info&gt; using &lt;web 
+name&gt;</b>, you are able, in a simple way, to let the receiver to get some request and to react on it.<br>
+That works only after you have exported your project.
+=============================================WEB
+
+CSL=============================================
+With consoles definitions you will be able to create GUI panels grouped together in a tabbed pane so that you can simply direct your printing 
+statements to one of them and thus physically separate your outputs.<br>
+That works only after you have exported your project.
+=============================================CSL
+
+ELEMENTS=============================================
+The CLApp structure looks like this:
+<ul style="list-style-type: none;">
+  <li><b>Meta-Scenario</b>: being the root element</li>
+  <ul>
+    <li><b>Resources</b></li>
+    <li><b>Scenario</b></li>
+    <ul>
+      <li><b>Actor</b></li>
+        <ul>
+          <li><b>Heap</b></li>
+          <ul>
+            <li><b>Cell</b></li>
+          </ul>
+        </ul>
+    </ul>
+  </ul>
+</ul>
+given that the Meta-Scenario root may contain several Resources blocks and several Scenarios, each Scenario may have several Actors, each Actor 
+having one or more Heaps that contain Cells.<br>
+A Cell is a unit that can be activated / deactivated and, when active, executed.
+=============================================ELEMENTS
+
+BEHAVIOR=============================================
+Each Scenario defines the way to proceed with the elements underneath. You have a bunch of parameters you can set to adapt the processing 
+behavior to your needs. The best, to learn more about that is to look at the existing scenarios set up for Activity Diagrams, Grafcets and Petri 
+Nets and, then, follow some tutorials dedicated to pure CLApp development.
+=============================================BEHAVIOR
